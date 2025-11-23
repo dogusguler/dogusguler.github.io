@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+ <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plans</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.127.0/Cesium.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.127.0/Widgets/widgets.min.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden;
+    }
+	
+	#legend {
+  position: absolute;
+  bottom: -150px;
+  right: 1%; /* 👈 distance from left edge */
+  transform: translateY(-50%); /* vertically center */
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: sans-serif;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: 200px;
+}
+
+#legend h4 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #333;
+  text-align: center;
+}
+
+#legend div {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.color-box {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 8px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+#tileset-selector {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: sans-serif;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 1001;
+}
+
+#tileset-selector label {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+#tilesetDropdown {
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+
+  .dropdown-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+  }
+
+
+  </style>
+</head>
+<!-- Just before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <div id="legend">
+  <h4>Zoning Type</h4>
+  <div><span class="color-box" style="background-color: rgb(166,206,227);"></span> Housing Area</div>
+  <div><span class="color-box" style="background-color: rgb(31,120,180);"></span> Urban Working Area</div>
+  <div><span class="color-box" style="background-color: rgb(178,223,138);"></span> Tourism Area</div>
+  <div><span class="color-box" style="background-color: rgb(51,160,44);"></span> Education Facility Area</div>
+  <div><span class="color-box" style="background-color: rgb(251,154,153);"></span> Prayer Place</div>
+  <div><span class="color-box" style="background-color: rgb(227,26,28);"></span> Social Cultural Place</div>
+  <div><span class="color-box" style="background-color: rgb(253,191,111);"></span> Highway Facility</div>
+   <div><span class="color-box" style="background-color: rgb(255,127,0);"></span> Healthcare Facility Area</div>
+  <div><span class="color-box" style="background-color: rgb(202,178,214);"></span> Functional Working Area</div>
+  <div><span class="color-box" style="background-color: rgb(106,61,154);"></span> Underground Infrastructure</div>
+  <div><span class="color-box" style="background-color: rgb(177,89,40);"></span> street</div>
+  <div><span class="color-box" style="background-color: rgb(255,255,153);"></span> housing</div>
+  <div><span class="color-box" style="background-color: rgb(252,129,126);"></span> park</div>
+  <div><span class="color-box" style="background-color: rgb(255, 255, 255); border: 1px solid #ccc;"></span> Other</div>
+</div>
+
+<div class="dropdown-container">
+<div class="dropdown">
+  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Plans
+  </a>
+
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="#" onclick="loadPlans1()">Plan 1 (Türkiye)</a></li>
+    <li><a class="dropdown-item" href="#" onclick="loadPlans2()">Plan 2 (Sweden)</a></li>
+    <li><a class="dropdown-item" href="#" onclick="loadPlans3()">Plan 3 (Sweden)</a></li>
+  </ul>
+</div>
+</div>
+
+  <script type="module">
+    
+	
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiYjJjZDM3YS05ODcxLTQzZmMtOWI3NS1lOTJkNzA1MTM0MTYiLCJpZCI6MTE0MDg4LCJpYXQiOjE3NDk3MTg2MzB9.8T-aoqv5I1ndwUq9KCH6JKeOiULB7ImzYuLDmpbOz7E';
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+      //terrain: Cesium.Terrain.fromWorldTerrain(),
+    });
+	
+	
+
+
+  var terrainProvider = await Cesium.CesiumTerrainProvider.fromUrl('https://api.pdok.nl/kadaster/3d-basisvoorziening/ogc/v1_0/collections/digitaalterreinmodel/quantized-mesh');
+  viewer.scene.terrainProvider = terrainProvider;
+  viewer.scene.globe.depthTestAgainstTerrain=true;
+
+viewer.scene.light = new Cesium.DirectionalLight({
+  direction: viewer.scene.camera.directionWC,
+});
+viewer.scene.preRender.addEventListener(function (scene, time) {
+  viewer.scene.light.direction = Cesium.Cartesian3.clone(
+    viewer.scene.camera.directionWC,
+    viewer.scene.light.direction
+  );
+});
+
+window.loadPlans1 = async function() {
+  
+const longitude = -3.82518;
+const latitude = 53.11728;
+const height = -500.0;
+
+
+    const tileset = await Cesium.Cesium3DTileset.fromUrl(
+      "Cesium/Apps/SampleData/TR/tileset.json"
+    );  
+    viewer.scene.primitives.add(tileset);
+	
+	const zoningStyle = new Cesium.Cesium3DTileStyle({
+  color: {
+    conditions: [
+      ["${zoningType} === 'Housing Area'", "color('rgb(166,206,227)')"],
+      ["${zoningType} === 'Urban Working Area'", "color('rgb(31,120,180)')"],
+      ["${zoningType} === 'Tourism Area'", "color('rgb(178,223,138)')"],
+      ["${zoningType} === 'Education Facility Area'", "color('rgb(51,160,44)')"],
+	    ["${zoningType} === 'Prayer Place'", "color('rgb(251,154,153)')"],
+	   ["${zoningType} === 'Social Cultural Place'", "color('rgb(227,26,28)')"],
+	   ["${zoningType} === 'Highway Facility'", "color('rgb(253,191,111)')"],
+	   ["${zoningType} === 'Healthcare Facility Area'", "color('rgb(255,127,0)')"],
+	    ["${zoningType} === 'Functional Working Area'", "color('rgb(202,178,214)')"],
+		["${zoningType} === 'Underground Infrastructure'", "color('rgb(106,61,154)')"],
+      ["true", "color('white')"]
+    ]
+  }
+});
+
+
+
+
+tileset.style = zoningStyle;
+
+    // tileset.debugShowBoundingVolume = true;
+    // tileset.debugColorizeTiles = true;
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+
+    viewer.scene.globe.depthTestAgainstTerrain = false;
+    viewer.scene.globe.enableLighting = false;
+    viewer.scene.highDynamicRange = false;
+    viewer.zoomTo(tileset, new Cesium.HeadingPitchRange(0, -0.5, 0));
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    handler.setInputAction(function(movement) {
+      var feature = viewer.scene.pick(movement.position);
+      if (!Cesium.defined(feature)) {
+          return;
+
+      }
+      var propertyNames = feature.getPropertyNames();
+      var length = propertyNames.length;
+        for (var i = 0; i < length; ++i) {
+            var propertyName = propertyNames[i];
+            console.log(propertyName + ': ' + feature.getProperty(propertyName));
+        }
+  }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+}
+
+
+
+window.loadPlans2 = async function() {
+  
+
+
+
+    const tileset = await Cesium.Cesium3DTileset.fromUrl(
+      "Cesium/Apps/SampleData/SE1/tileset.json"
+    );  
+    viewer.scene.primitives.add(tileset);
+	
+	const zoningStyle = new Cesium.Cesium3DTileStyle({
+  color: {
+    conditions: [
+      ["${zoneType1} === 'housing'", "color('rgb(255,255,153)')"],
+		["${zoningType} === 'Underground Infrastructure'", "color('rgb(106,61,154)')"],
+      ["true", "color('white')"]
+    ]
+  }
+});
+
+
+
+
+tileset.style = zoningStyle;
+
+    // tileset.debugShowBoundingVolume = true;
+    // tileset.debugColorizeTiles = true;
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+    viewer.scene.globe.enableLighting = false;
+    viewer.scene.highDynamicRange = false;
+    viewer.zoomTo(tileset, new Cesium.HeadingPitchRange(0, -0.5, 0));
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    handler.setInputAction(function(movement) {
+      var feature = viewer.scene.pick(movement.position);
+      if (!Cesium.defined(feature)) {
+          return;
+
+      }
+      var propertyNames = feature.getPropertyNames();
+      var length = propertyNames.length;
+        for (var i = 0; i < length; ++i) {
+            var propertyName = propertyNames[i];
+            console.log(propertyName + ': ' + feature.getProperty(propertyName));
+        }
+  }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+}
+
+window.loadPlans3 = async function() {
+  
+
+
+
+    const tileset = await Cesium.Cesium3DTileset.fromUrl(
+      "Cesium/Apps/SampleData/SE2/tileset.json"
+    );  
+    viewer.scene.primitives.add(tileset);
+	
+	const zoningStyle = new Cesium.Cesium3DTileStyle({
+  color: {
+    conditions: [
+      ["${zoneType1} === 'street'", "color('rgb(177,89,40)')"],
+      ["${zoneType1} === 'housing'", "color('rgb(255,255,153)')"],
+       ["${zoneType1} === 'park'", "color('rgb(252,129,126)')"],
+      ["true", "color('white')"]
+    ]
+  }
+});
+
+
+
+
+tileset.style = zoningStyle;
+
+    // tileset.debugShowBoundingVolume = true;
+    // tileset.debugColorizeTiles = true;
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+    viewer.scene.globe.enableLighting = false;
+    viewer.scene.highDynamicRange = false;
+    viewer.zoomTo(tileset, new Cesium.HeadingPitchRange(0, -0.5, 0));
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    handler.setInputAction(function(movement) {
+      var feature = viewer.scene.pick(movement.position);
+      if (!Cesium.defined(feature)) {
+          return;
+
+      }
+      var propertyNames = feature.getPropertyNames();
+      var length = propertyNames.length;
+        for (var i = 0; i < length; ++i) {
+            var propertyName = propertyNames[i];
+            console.log(propertyName + ': ' + feature.getProperty(propertyName));
+        }
+  }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+}
+
+  </script>
+</body>
+</html>
